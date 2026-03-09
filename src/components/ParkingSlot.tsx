@@ -14,15 +14,15 @@ export function ParkingSlot({ slotNumber, isOccupied, isBlocked }: ParkingSlotPr
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: slotNumber * 0.08 }}
-        className="relative rounded-xl border-2 border-accent/40 bg-accent/5 p-4 sm:p-6 flex flex-col items-center justify-center gap-2"
+        className="relative rounded-xl border-2 border-destructive/50 bg-destructive/10 glow-red p-4 sm:p-6 flex flex-col items-center justify-center gap-2"
       >
         <div className="text-[10px] font-heading text-muted-foreground uppercase tracking-widest">
           Slot {slotNumber}
         </div>
-        <Lock className="w-8 h-8 sm:w-10 sm:h-10 text-accent" />
-        <span className="text-xs font-heading font-semibold text-accent">Allocated</span>
+        <Car className="w-8 h-8 sm:w-10 sm:h-10 text-destructive" />
+        <span className="text-xs font-heading font-semibold text-destructive">Occupied</span>
         <motion.div
-          className="absolute top-2 right-2 w-2 h-2 rounded-full bg-accent"
+          className="absolute top-2 right-2 w-2 h-2 rounded-full bg-destructive"
           animate={{ opacity: [1, 0.4, 1] }}
           transition={{ duration: 2, repeat: Infinity }}
         />
