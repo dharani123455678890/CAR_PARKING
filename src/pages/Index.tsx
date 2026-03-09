@@ -56,7 +56,7 @@ const Index = () => {
           <div className="grid grid-cols-3 gap-3">
             <StatusCard title="Total" value={data.totalSpaces} icon={ParkingCircle} />
             <StatusCard title="Free" value={data.freeSpaces} icon={ParkingCircle} variant="success" />
-            <StatusCard title="Allocated" value={data.allocatedSpaces} icon={Lock} variant={data.freeSpaces === 0 ? 'danger' : 'warning'} />
+            <StatusCard title="Occupied" value={data.allocatedSpaces} icon={Car} variant={data.freeSpaces === 0 ? 'danger' : 'warning'} />
           </div>
 
           {/* Occupancy Bar */}
