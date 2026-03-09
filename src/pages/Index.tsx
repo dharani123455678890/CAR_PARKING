@@ -2,7 +2,7 @@ import { useThingSpeak } from '@/hooks/useThingSpeak';
 import { StatusCard } from '@/components/StatusCard';
 import { ParkingSlot } from '@/components/ParkingSlot';
 import { VehicleChart } from '@/components/VehicleChart';
-import { Car, ParkingCircle, Activity, Wifi, WifiOff, AlertTriangle } from 'lucide-react';
+import { Car, ParkingCircle, Activity, Wifi, AlertTriangle, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const Index = () => {
@@ -20,7 +20,7 @@ const Index = () => {
           <h1 className="text-xl sm:text-2xl font-heading font-bold text-foreground tracking-tight">
             Smart Parking
           </h1>
-          <p className="text-xs text-muted-foreground mt-0.5">IoT Dashboard • 5 Slots</p>
+          <p className="text-xs text-muted-foreground mt-0.5">IoT Dashboard • 6 Slots</p>
         </div>
         <div className="flex items-center gap-2">
           {data.error ? (
@@ -55,8 +55,8 @@ const Index = () => {
           {/* Stats */}
           <div className="grid grid-cols-3 gap-3">
             <StatusCard title="Total" value={data.totalSpaces} icon={ParkingCircle} />
-            <StatusCard title="Free" value={data.availableSpaces} icon={ParkingCircle} variant="success" />
-            <StatusCard title="Cars" value={data.totalVehicles} icon={Car} variant={data.availableSpaces === 0 ? 'danger' : 'warning'} />
+            <StatusCard title="Free" value={data.freeSpaces} icon={ParkingCircle} variant="success" />
+            <StatusCard title="Allocated" value={data.allocatedSpaces} icon={Lock} variant={data.freeSpaces === 0 ? 'danger' : 'warning'} />
           </div>
 
           {/* Occupancy Bar */}
@@ -67,15 +67,17 @@ const Index = () => {
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-heading text-muted-foreground uppercase tracking-wider">Occupancy</span>
-              <span className="text-sm font-heading font-bold text-foreground">{data.occupancyPercent}%</span>
+              <span className="text-sm font-heading font-bold text-foreground">
+                {Math.round((data.allocatedSpaces / data.totalSpaces) * 100)}%
+              </span>
             </div>
             <div className="h-2.5 bg-secondary rounded-full overflow-hidden">
               <motion.div
                 className={`h-full rounded-full ${
-                  data.occupancyPercent >= 80 ? 'bg-destructive' : data.occupancyPercent >= 50 ? 'bg-accent' : 'bg-success'
+                  data.freeSpaces === 0 ? 'bg-destructive' : data.freeSpaces <= 1 ? 'bg-accent' : 'bg-success'
                 }`}
                 initial={{ width: 0 }}
-                animate={{ width: `${data.occupancyPercent}%` }}
+                animate={{ width: `${Math.round((data.allocatedSpaces / data.totalSpaces) * 100)}%` }}
                 transition={{ duration: 1, ease: 'easeOut' }}
               />
             </div>
