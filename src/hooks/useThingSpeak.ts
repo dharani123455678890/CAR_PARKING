@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 
 const THINGSPEAK_CHANNEL_ID = '2961498';
 const THINGSPEAK_API_KEY = 'FWSMGQL41CVA21TK';
-const POLL_INTERVAL = 15000;
+const POLL_INTERVAL = 5000;
 
 export interface ParkingFeed {
   created_at: string;
