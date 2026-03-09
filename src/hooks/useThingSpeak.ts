@@ -10,38 +10,43 @@ export interface ParkingFeed {
   field1: string | null;
   field2: string | null;
   field3: string | null;
-  field4: string | null;
-  field5: string | null;
+}
+
+export interface SlotData {
+  occupied: boolean;
+  blocked: boolean;
 }
 
 export interface ParkingData {
   totalVehicles: number;
-  slots: { occupied: boolean; blocked: boolean }[];
+  slots: SlotData[];
   totalSpaces: number;
-  availableSpaces: number;
-  occupancyPercent: number;
+  allocatedSpaces: number;
+  freeSpaces: number;
   feeds: ParkingFeed[];
   lastUpdated: Date | null;
   isLoading: boolean;
   error: string | null;
 }
 
-const BLOCKED_SLOTS = [2]; // slot 3 (0-indexed = 2) is always blocked/allocated
+// Slots 3,4,5,6 (indexes 2-5) are always allocated
+const BLOCKED_INDEXES = [2, 3, 4, 5];
+const TOTAL_SLOTS = 6;
 
 function generateDemoFeeds(): ParkingFeed[] {
   const feeds: ParkingFeed[] = [];
   const now = Date.now();
   for (let i = 0; i < 30; i++) {
     const t = new Date(now - (30 - i) * 60000);
-    const v = Math.floor(Math.random() * 4);
+    const s1 = Math.random() > 0.5 ? '1' : '0';
+    const s2 = Math.random() > 0.5 ? '1' : '0';
+    const v = parseInt(s1) + parseInt(s2);
     feeds.push({
       created_at: t.toISOString(),
       entry_id: i + 1,
       field1: String(v),
-      field2: String(Math.random() > 0.5 ? 1 : 0),
-      field3: String(Math.random() > 0.5 ? 1 : 0),
-      field4: String(Math.random() > 0.6 ? 1 : 0),
-      field5: String(Math.random() > 0.6 ? 1 : 0),
+      field2: s1,
+      field3: s2,
     });
   }
   return feeds;
@@ -89,26 +94,30 @@ export function useThingSpeak(): ParkingData {
   const latest = feeds.length > 0 ? feeds[feeds.length - 1] : null;
   const totalVehicles = latest ? parseInt(latest.field1 || '0', 10) : 0;
 
-  const slotFields = [latest?.field2, latest?.field3, latest?.field4, latest?.field5, null];
-  const slots = Array.from({ length: 5 }, (_, i) => {
-    const isBlocked = BLOCKED_SLOTS.includes(i);
-    const occupied = isBlocked ? true : slotFields[i] === '1';
-    return { occupied, blocked: isBlocked };
+  // Slot 1 = field2, Slot 2 = field3, Slots 3-6 = always blocked
+  const slot1Occupied = latest?.field2 === '1';
+  const slot2Occupied = latest?.field3 === '1';
+
+  const slots: SlotData[] = Array.from({ length: TOTAL_SLOTS }, (_, i) => {
+    if (BLOCKED_INDEXES.includes(i)) {
+      return { occupied: true, blocked: true };
+    }
+    // i=0 → slot1, i=1 → slot2
+    const occupied = i === 0 ? slot1Occupied : slot2Occupied;
+    return { occupied, blocked: false };
   });
 
-  const totalSpaces = 5;
-  const blockedCount = BLOCKED_SLOTS.length;
-  const occupiedNonBlocked = slots.filter((s, i) => s.occupied && !BLOCKED_SLOTS.includes(i)).length;
-  const usableSpaces = totalSpaces - blockedCount;
-  const availableSpaces = usableSpaces - occupiedNonBlocked;
-  const occupancyPercent = usableSpaces > 0 ? Math.round(((occupiedNonBlocked + blockedCount) / totalSpaces) * 100) : 0;
+  // Allocated = blocked slots + occupied demo slots
+  const occupiedDemoSlots = (slot1Occupied ? 1 : 0) + (slot2Occupied ? 1 : 0);
+  const allocatedSpaces = BLOCKED_INDEXES.length + occupiedDemoSlots;
+  const freeSpaces = TOTAL_SLOTS - allocatedSpaces;
 
   return {
     totalVehicles,
     slots,
-    totalSpaces,
-    availableSpaces,
-    occupancyPercent,
+    totalSpaces: TOTAL_SLOTS,
+    allocatedSpaces,
+    freeSpaces,
     feeds,
     lastUpdated,
     isLoading,
