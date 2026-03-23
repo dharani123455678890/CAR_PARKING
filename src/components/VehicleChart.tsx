@@ -8,16 +8,16 @@ interface VehicleChartProps {
 
 export function VehicleChart({ feeds }: VehicleChartProps) {
   const data = feeds
-    .filter(f => f.field1 !== null)
+    .filter(f => f.field1 !== null || f.field2 !== null)
     .map(f => ({
       time: format(new Date(f.created_at), 'HH:mm'),
-      vehicles: parseInt(f.field1 || '0', 10),
+      occupied: (f.field1 === '1' ? 1 : 0) + (f.field2 === '1' ? 1 : 0),
     }));
 
   return (
     <div className="rounded-xl border border-border bg-card p-4 sm:p-6">
       <h3 className="text-sm font-heading text-muted-foreground uppercase tracking-wider mb-4">
-        Vehicle Entry History
+        Occupancy History
       </h3>
       <div className="h-48 sm:h-64">
         <ResponsiveContainer width="100%" height="100%">
@@ -47,7 +47,7 @@ export function VehicleChart({ feeds }: VehicleChartProps) {
             />
             <Line
               type="monotone"
-              dataKey="vehicles"
+              dataKey="occupied"
               stroke="hsl(160 84% 44%)"
               strokeWidth={2}
               dot={{ fill: 'hsl(160 84% 44%)', r: 3 }}

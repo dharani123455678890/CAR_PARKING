@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 
-const THINGSPEAK_CHANNEL_ID = '2961498';
-const THINGSPEAK_API_KEY = 'FWSMGQL41CVA21TK';
-const POLL_INTERVAL = 5000;
+const THINGSPEAK_CHANNEL_ID = '3308638';
+const THINGSPEAK_READ_API_KEY = 'ZYPQRF2MS2WEBFKK';
+const POLL_INTERVAL = 2000;
 
 export interface ParkingFeed {
   created_at: string;
@@ -40,13 +40,12 @@ function generateDemoFeeds(): ParkingFeed[] {
     const t = new Date(now - (30 - i) * 60000);
     const s1 = Math.random() > 0.5 ? '1' : '0';
     const s2 = Math.random() > 0.5 ? '1' : '0';
-    const v = parseInt(s1) + parseInt(s2);
     feeds.push({
       created_at: t.toISOString(),
       entry_id: i + 1,
-      field1: String(v),
-      field2: s1,
-      field3: s2,
+      field1: s1,
+      field2: s2,
+      field3: null,
     });
   }
   return feeds;
@@ -62,7 +61,7 @@ export function useThingSpeak(): ParkingData {
   const fetchData = useCallback(async () => {
     try {
       const res = await fetch(
-        `https://api.thingspeak.com/channels/${THINGSPEAK_CHANNEL_ID}/feeds.json?api_key=${THINGSPEAK_API_KEY}&results=50`
+        `https://api.thingspeak.com/channels/${THINGSPEAK_CHANNEL_ID}/feeds.json?api_key=${THINGSPEAK_READ_API_KEY}&results=50`
       );
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
@@ -92,11 +91,11 @@ export function useThingSpeak(): ParkingData {
   }, [fetchData]);
 
   const latest = feeds.length > 0 ? feeds[feeds.length - 1] : null;
-  const totalVehicles = latest ? parseInt(latest.field1 || '0', 10) : 0;
 
-  // Slot 1 = field2, Slot 2 = field3, Slots 3-6 = always blocked
-  const slot1Occupied = latest?.field2 === '1';
-  const slot2Occupied = latest?.field3 === '1';
+  // Slot 1 = field1 (0=free, 1=occupied), Slot 2 = field2 (0=free, 1=occupied), Slots 3-6 = always occupied
+  const slot1Occupied = latest?.field1 === '1';
+  const slot2Occupied = latest?.field2 === '1';
+  const totalVehicles = (slot1Occupied ? 1 : 0) + (slot2Occupied ? 1 : 0);
 
   const slots: SlotData[] = Array.from({ length: TOTAL_SLOTS }, (_, i) => {
     if (BLOCKED_INDEXES.includes(i)) {
