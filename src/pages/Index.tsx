@@ -2,7 +2,7 @@ import { useThingSpeak } from '@/hooks/useThingSpeak';
 import { StatusCard } from '@/components/StatusCard';
 import { ParkingSlot } from '@/components/ParkingSlot';
 import { VehicleChart } from '@/components/VehicleChart';
-import { Car, ParkingCircle, Activity, Wifi, AlertTriangle, Lock } from 'lucide-react';
+import { Car, ParkingCircle, Activity, Wifi, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const Index = () => {
@@ -83,25 +83,14 @@ const Index = () => {
             </div>
           </motion.div>
 
-          {/* Top Slots - SLOT 1 & 2 Only */}
-          <div>
-            <h2 className="text-xs font-heading text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
-              <Activity className="w-3.5 h-3.5" /> Active Slots
-            </h2>
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <ParkingSlot key={0} slotNumber={1} isOccupied={data.slots[0]?.occupied} isBlocked={data.slots[0]?.blocked} />
-              <ParkingSlot key={1} slotNumber={2} isOccupied={data.slots[1]?.occupied} isBlocked={data.slots[1]?.blocked} />
-            </div>
-          </div>
-
-          {/* All Parking Map */}
+          {/* Parking Map */}
           <div>
             <h2 className="text-xs font-heading text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-              <Lock className="w-3.5 h-3.5" /> Reserved Slots
+              <Activity className="w-3.5 h-3.5" /> Live Parking Map
             </h2>
             <div className="grid grid-cols-3 gap-3">
-              {data.slots.slice(2).map((slot, i) => (
-                <ParkingSlot key={i + 2} slotNumber={i + 3} isOccupied={slot.occupied} isBlocked={slot.blocked} />
+              {data.slots.map((slot, i) => (
+                <ParkingSlot key={i} slotNumber={i + 1} isOccupied={slot.occupied} isBlocked={slot.blocked} />
               ))}
             </div>
           </div>
